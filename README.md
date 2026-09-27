@@ -4,7 +4,7 @@
 
 - Alexis Rosales
 - Camilo Quezada
-- Cristóbal Celis
+- Cristóbal Celis (No aporta con lo que se le solicita)
 - Abraham Canales
 
 ## Videos de demostración
