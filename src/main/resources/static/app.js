@@ -15,6 +15,18 @@ document.addEventListener("DOMContentLoaded", () => {
         .addEventListener("submit", iniciarSesion);
 
     document
+        .getElementById("btnMostrarRecuperacion")
+        .addEventListener("click", mostrarRecuperacionPassword);
+
+    document
+        .getElementById("btnCancelarRecuperacion")
+        .addEventListener("click", ocultarRecuperacionPassword);
+
+    document
+        .getElementById("formRecuperacion")
+        .addEventListener("submit", recuperarPassword);
+
+    document
         .getElementById("formRegistro")
         .addEventListener("submit", registrarCliente);
 
@@ -429,6 +441,9 @@ async function iniciarSesion(evento) {
             "";
 
 
+        ocultarRecuperacionPassword();
+
+
         await consultarSesion();
 
 
@@ -462,6 +477,169 @@ async function iniciarSesion(evento) {
         mostrarMensaje(
             resultado,
             `Error al iniciar sesión: ${error.message}`,
+            false
+        );
+    }
+}
+
+
+/* =========================================================
+   RECUPERAR CONTRASEÑA
+   ========================================================= */
+
+function mostrarRecuperacionPassword() {
+
+    const panel =
+        document.getElementById(
+            "recuperacionPassword"
+        );
+
+
+    const emailLogin =
+        document.getElementById(
+            "emailLogin"
+        );
+
+
+    const emailRecuperacion =
+        document.getElementById(
+            "emailRecuperacion"
+        );
+
+
+    const resultado =
+        document.getElementById(
+            "resultadoRecuperacion"
+        );
+
+
+    resultado.textContent =
+        "";
+
+    resultado.className =
+        "";
+
+
+    if (
+        emailLogin.value.trim() !== ""
+        && emailRecuperacion.value.trim() === ""
+    ) {
+
+        emailRecuperacion.value =
+            emailLogin.value.trim();
+    }
+
+
+    panel.hidden =
+        false;
+
+
+    emailRecuperacion.focus();
+}
+
+
+function ocultarRecuperacionPassword() {
+
+    const panel =
+        document.getElementById(
+            "recuperacionPassword"
+        );
+
+
+    const resultado =
+        document.getElementById(
+            "resultadoRecuperacion"
+        );
+
+
+    panel.hidden =
+        true;
+
+
+    resultado.textContent =
+        "";
+
+    resultado.className =
+        "";
+}
+
+
+async function recuperarPassword(evento) {
+
+    evento.preventDefault();
+
+
+    const resultado =
+        document.getElementById(
+            "resultadoRecuperacion"
+        );
+
+
+    const email =
+        document
+            .getElementById(
+                "emailRecuperacion"
+            )
+            .value
+            .trim();
+
+
+    try {
+
+        const respuesta = await fetch(
+            `${API_BASE}/clientes/recuperar-password`,
+            {
+                method:
+                    "POST",
+
+                headers:
+                    await obtenerHeadersJson(),
+
+                credentials:
+                    "same-origin",
+
+                body:
+                    JSON.stringify({
+                        email: email
+                    })
+            }
+        );
+
+
+        if (!respuesta.ok) {
+
+            throw new Error(
+                await obtenerMensajeError(
+                    respuesta
+                )
+            );
+        }
+
+
+        const datos =
+            await respuesta.json();
+
+
+        mostrarMensaje(
+            resultado,
+            datos.mensaje
+                || "Si el correo se encuentra registrado, se enviará una nueva contraseña temporal.",
+            true
+        );
+
+
+        document
+            .getElementById(
+                "formRecuperacion"
+            )
+            .reset();
+
+
+    } catch (error) {
+
+        mostrarMensaje(
+            resultado,
+            `Error al recuperar contraseña: ${error.message}`,
             false
         );
     }

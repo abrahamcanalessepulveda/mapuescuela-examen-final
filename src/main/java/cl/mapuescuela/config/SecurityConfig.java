@@ -43,7 +43,7 @@ public class SecurityConfig {
                     "/img/**"
                 ).permitAll()
 
-                // Token CSRF y rutas de autenticación.
+                // Token CSRF y rutas públicas de autenticación.
                 .requestMatchers(
                     "/api/csrf",
                     "/api/admin/login",
@@ -51,6 +51,7 @@ public class SecurityConfig {
                     "/api/admin/logout",
                     "/api/clientes/registro",
                     "/api/clientes/login",
+                    "/api/clientes/recuperar-password",
                     "/api/clientes/sesion",
                     "/api/clientes/logout"
                 ).permitAll()

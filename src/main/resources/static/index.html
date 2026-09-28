@@ -67,6 +67,48 @@
             background-color: rgba(255, 255, 255, 0.24);
         }
 
+        /* =====================================================
+           RECUPERACIÓN DE CONTRASEÑA
+           ===================================================== */
+
+        .enlace-recuperacion {
+            margin: 12px 0 4px;
+            text-align: center;
+        }
+
+        .btn-enlace-recuperacion {
+            width: auto;
+            padding: 0;
+            background: transparent;
+            color: #16733f;
+            border: 0;
+            font-size: 14px;
+            font-weight: 700;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+
+        .btn-enlace-recuperacion:hover {
+            opacity: 0.8;
+        }
+
+        .recuperacion-password {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid #d9d9d9;
+        }
+
+        .acciones-recuperacion {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .acciones-recuperacion button {
+            width: auto;
+        }
+
         @media (max-width: 650px) {
 
             .barra-mis-pedidos {
@@ -301,6 +343,75 @@
                     <div
                         id="resultadoLogin"
                         role="status">
+                    </div>
+
+
+                    <p class="enlace-recuperacion">
+
+                        <button
+                            type="button"
+                            id="btnMostrarRecuperacion"
+                            class="btn-enlace-recuperacion">
+                            ¿Olvidaste tu contraseña?
+                        </button>
+
+                    </p>
+
+
+                    <div
+                        id="recuperacionPassword"
+                        class="recuperacion-password"
+                        hidden>
+
+                        <h3>
+                            Recuperar contraseña
+                        </h3>
+
+                        <p class="texto-acceso">
+                            Ingresa el correo electrónico registrado en Mapuescuela.
+                            Si existe una cuenta asociada, recibirás una contraseña
+                            temporal por correo.
+                        </p>
+
+
+                        <form id="formRecuperacion">
+
+                            <label for="emailRecuperacion">
+                                Correo electrónico
+                            </label>
+
+                            <input
+                                type="email"
+                                id="emailRecuperacion"
+                                autocomplete="email"
+                                maxlength="150"
+                                required
+                            >
+
+
+                            <div class="acciones-recuperacion">
+
+                                <button type="submit">
+                                    Enviar contraseña temporal
+                                </button>
+
+                                <button
+                                    type="button"
+                                    id="btnCancelarRecuperacion"
+                                    class="btn-volver-inicio">
+                                    Volver a iniciar sesión
+                                </button>
+
+                            </div>
+
+                        </form>
+
+
+                        <div
+                            id="resultadoRecuperacion"
+                            role="status">
+                        </div>
+
                     </div>
 
                 </div>

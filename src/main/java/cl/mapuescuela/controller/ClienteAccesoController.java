@@ -1,4 +1,3 @@
-
 package cl.mapuescuela.controller;
 
 import java.util.LinkedHashMap;
@@ -8,6 +7,7 @@ import java.util.Optional;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.MailException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import cl.mapuescuela.model.Cliente;
 import cl.mapuescuela.repository.ClienteRepository;
+import cl.mapuescuela.service.RecuperacionPasswordService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 
@@ -26,13 +27,16 @@ public class ClienteAccesoController {
 
     private final ClienteRepository clienteRepository;
     private final PasswordEncoder passwordEncoder;
+    private final RecuperacionPasswordService recuperacionPasswordService;
 
     public ClienteAccesoController(
             ClienteRepository clienteRepository,
-            PasswordEncoder passwordEncoder) {
+            PasswordEncoder passwordEncoder,
+            RecuperacionPasswordService recuperacionPasswordService) {
 
         this.clienteRepository = clienteRepository;
         this.passwordEncoder = passwordEncoder;
+        this.recuperacionPasswordService = recuperacionPasswordService;
     }
 
     @PostMapping("/registro")
@@ -166,6 +170,47 @@ public class ClienteAccesoController {
         return ResponseEntity.ok(respuesta);
     }
 
+    @PostMapping("/recuperar-password")
+    public ResponseEntity<Map<String, Object>> recuperarPassword(
+            @RequestBody RecuperarPasswordRequest datos) {
+
+        if (datos == null || esVacio(datos.email())) {
+            return respuesta(
+                    HttpStatus.BAD_REQUEST,
+                    "Debe ingresar un correo electrónico.");
+        }
+
+        String email = datos.email().trim().toLowerCase();
+
+        if (email.length() > 150
+                || !email.matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$")) {
+
+            return respuesta(
+                    HttpStatus.BAD_REQUEST,
+                    "Debe ingresar un correo electrónico válido.");
+        }
+
+        try {
+            recuperacionPasswordService.recuperarPassword(email);
+
+            /*
+             * La respuesta es la misma exista o no el correo.
+             * De esta forma no se revela qué direcciones están
+             * registradas en MapuEscuela.
+             */
+            return respuesta(
+                    HttpStatus.OK,
+                    "Si el correo se encuentra registrado, "
+                    + "se enviará una nueva contraseña temporal.");
+
+        } catch (MailException excepcion) {
+            return respuesta(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "No fue posible enviar el correo de recuperación. "
+                    + "Intente nuevamente más tarde.");
+        }
+    }
+
     @GetMapping("/sesion")
     public ResponseEntity<Map<String, Object>> consultarSesion(
             HttpSession session) {
@@ -270,5 +315,9 @@ public class ClienteAccesoController {
     public record LoginClienteRequest(
             String email,
             String password) {
+    }
+
+    public record RecuperarPasswordRequest(
+            String email) {
     }
 }

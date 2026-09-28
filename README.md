@@ -26,6 +26,7 @@ El MVP permite:
 
 - Registrar clientes.
 - Iniciar sesión en el Portal de Clientes.
+- Recuperar la contraseña mediante correo electrónico.
 - Consultar productos disponibles.
 - Generar pedidos.
 - Seleccionar retiro en local o despacho.
@@ -72,8 +73,11 @@ La aplicación utiliza:
 - Servicios REST
 - Spring Data JPA
 - Spring Security
+- Spring Mail
 
 Spring Boot contiene la lógica principal de la aplicación y permite comunicar la interfaz con MySQL y Flowable.
+
+Spring Mail permite enviar correos electrónicos para la recuperación de contraseña de los clientes mediante un servidor SMTP.
 
 ### Base de datos
 
@@ -94,13 +98,13 @@ De forma simplificada, la arquitectura corresponde a:
 Portal de Clientes / Panel Administrativo
                   |
                   v
-             Spring Boot
-              /       \
-             v         v
-          MySQL     Flowable REST
+              Spring Boot
+               /       \
+              v         v
+           MySQL     Flowable REST
                        |
                        v
-                  Proceso BPMN
+                   Proceso BPMN
 ```
 
 Además, Spring Boot incorpora un External Worker que procesa la actividad de confirmación del pago y actualización del stock.
@@ -113,12 +117,14 @@ Además, Spring Boot incorpora un External Worker que procesa la actividad de co
 - Spring Boot 4.0.8
 - Spring Data JPA
 - Spring Security
+- Spring Mail
 - Maven Wrapper
 - MySQL 8
 - HTML
 - CSS
 - JavaScript
 - REST
+- SMTP
 - BPMN
 - Flowable 6.8.0
 - Docker
@@ -138,6 +144,7 @@ Entre sus funciones se encuentran:
 
 - Registrar una nueva cuenta.
 - Iniciar sesión.
+- Recuperar la contraseña mediante correo electrónico.
 - Consultar el catálogo de productos.
 - Generar un pedido.
 - Seleccionar la modalidad de entrega.
@@ -148,6 +155,26 @@ Entre sus funciones se encuentran:
 La información de pedidos se encuentra asociada a la sesión del cliente autenticado.
 
 De esta forma, cada cliente puede consultar únicamente los pedidos correspondientes a su propia cuenta.
+
+### Recuperación de contraseña
+
+El Portal de Clientes incorpora la opción **¿Olvidaste tu contraseña?**.
+
+El cliente puede ingresar el correo electrónico registrado en MapuEscuela para solicitar la recuperación de acceso.
+
+Cuando la solicitud es procesada:
+
+1. La aplicación busca una cuenta asociada al correo ingresado.
+2. Se genera automáticamente una contraseña temporal aleatoria.
+3. La contraseña temporal se cifra antes de almacenarse en la base de datos.
+4. La contraseña temporal se envía al correo registrado mediante SMTP.
+5. El cliente puede utilizar la nueva contraseña para volver a iniciar sesión.
+
+La aplicación muestra un mensaje genérico después de procesar la solicitud, evitando informar directamente si una dirección de correo determinada se encuentra registrada.
+
+Para el envío de los correos se utiliza Spring Mail y un servidor SMTP de Gmail.
+
+Las credenciales del correo no se almacenan directamente en el código fuente ni en el repositorio.
 
 ---
 
@@ -206,6 +233,12 @@ Del mismo modo, al volver a iniciar una sesión como cliente se elimina la sesi�
 Esto permite separar las funciones administrativas de las operaciones disponibles para los clientes.
 
 Las contraseñas utilizadas por la aplicación no se almacenan directamente en el repositorio.
+
+Las contraseñas de los clientes se almacenan cifradas mediante el mecanismo de codificación de contraseñas utilizado por Spring Security.
+
+En el proceso de recuperación, la contraseña temporal se envía al correo del cliente y únicamente su versión cifrada queda almacenada en la base de datos.
+
+Las credenciales utilizadas para MySQL, administración y correo electrónico se proporcionan mediante variables de entorno.
 
 ---
 
@@ -594,7 +627,7 @@ La versión utilizada durante las pruebas finales corresponde a V9.
 
 ## 10. Variables de entorno
 
-Antes de iniciar la aplicación deben configurarse las contraseñas locales.
+Antes de iniciar la aplicación deben configurarse las contraseñas locales necesarias.
 
 En PowerShell:
 
@@ -613,7 +646,33 @@ $env:FLOWABLE_PASSWORD="test"
 $env:ADMIN_USERNAME="admin"
 ```
 
-Las contraseñas reales utilizadas durante el desarrollo no se almacenan en el repositorio.
+### Configuración del correo para recuperación de contraseña
+
+Para habilitar el envío de contraseñas temporales por correo electrónico deben configurarse adicionalmente:
+
+```powershell
+$env:MAIL_USERNAME="CORREO_GMAIL"
+$env:MAIL_PASSWORD="CONTRASENA_DE_APLICACION_GMAIL"
+```
+
+`MAIL_USERNAME` corresponde a la cuenta Gmail utilizada como remitente.
+
+`MAIL_PASSWORD` debe contener una contraseña de aplicación válida para el acceso SMTP de la cuenta configurada.
+
+La aplicación utiliza la siguiente configuración SMTP:
+
+```text
+Servidor: smtp.gmail.com
+Puerto: 587
+Autenticación: habilitada
+STARTTLS: habilitado
+```
+
+Las variables de correo son necesarias únicamente para utilizar la función de recuperación de contraseña. Si no se configuran, el resto del MVP puede iniciar y funcionar normalmente, pero no será posible realizar el envío del correo de recuperación.
+
+Las credenciales reales utilizadas durante el desarrollo no se almacenan en el repositorio.
+
+No se deben escribir contraseñas reales directamente en `application.properties` ni incorporarlas a GitHub.
 
 ---
 
@@ -659,11 +718,30 @@ Desde este portal es posible:
 
 - Registrar una cuenta.
 - Iniciar sesión.
+- Recuperar la contraseña mediante correo electrónico.
 - Consultar productos.
 - Realizar pedidos.
 - Consultar los pedidos asociados a la cuenta.
 - Adjuntar comprobantes.
 - Cerrar sesión.
+
+### Recuperar contraseña
+
+Desde la pantalla de acceso seleccionar:
+
+```text
+¿Olvidaste tu contraseña?
+```
+
+Ingresar el correo electrónico registrado y seleccionar:
+
+```text
+Enviar contraseña temporal
+```
+
+Si la cuenta se encuentra registrada y el correo se puede enviar correctamente, el cliente recibirá una nueva contraseña temporal.
+
+La contraseña temporal recibida puede utilizarse posteriormente para iniciar sesión en el Portal de Clientes.
 
 ---
 
@@ -702,6 +780,7 @@ Una instalación completa utiliza:
 | Flowable UI | `http://localhost:8081/flowable-ui/` |
 | Flowable REST | `http://localhost:8082/flowable-rest/service` |
 | MySQL | `localhost:3306` |
+| Gmail SMTP | `smtp.gmail.com:587` |
 
 ---
 
@@ -712,6 +791,10 @@ Durante el desarrollo se probaron diferentes situaciones del proceso.
 Entre ellas:
 
 - Registro e inicio de sesión de clientes.
+- Recuperación de contraseña desde el Portal de Clientes.
+- Generación automática de una contraseña temporal.
+- Envío de la contraseña temporal mediante Gmail SMTP.
+- Inicio de sesión utilizando la contraseña temporal recibida.
 - Separación entre sesión de cliente y administrador.
 - Consulta de pedidos correspondientes únicamente al cliente autenticado.
 - Generación de pedidos.
@@ -741,6 +824,8 @@ Spring Boot
 MySQL
 Flowable
 ```
+
+Adicionalmente, se comprobó el funcionamiento de la recuperación de contraseña desde la interfaz web hasta la recepción del correo y posterior autenticación del cliente mediante la nueva contraseña temporal.
 
 ---
 
@@ -967,7 +1052,7 @@ Flowable
 BPMN
 ```
 
-El Portal de Clientes permite registrar usuarios, consultar productos, generar pedidos y consultar el historial correspondiente a la cuenta autenticada.
+El Portal de Clientes permite registrar usuarios, iniciar sesión, recuperar el acceso mediante correo electrónico, consultar productos, generar pedidos y consultar el historial correspondiente a la cuenta autenticada.
 
 El Panel Administrativo permite gestionar pedidos, inventario y clientes, además de continuar las distintas actividades administrativas del proceso.
 
