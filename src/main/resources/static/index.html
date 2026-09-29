@@ -11,42 +11,41 @@
 
     <style>
         /* =====================================================
-           BARRA DE ACCIONES DE MIS PEDIDOS
+           SESIÓN DEL CLIENTE
            ===================================================== */
 
-        .barra-mis-pedidos {
+        .barra-sesion-cliente {
             display: flex;
             align-items: center;
             justify-content: space-between;
             gap: 16px;
             flex-wrap: wrap;
 
-            margin: 12px 0 10px;
-            padding: 10px 12px;
+            margin: 12px 0 18px;
+            padding: 10px 14px;
 
             background-color: #16733f;
             border-radius: 7px;
         }
 
-        .barra-mis-pedidos-usuario {
+        .sesion-global-cliente {
             display: flex;
             align-items: center;
-            justify-content: flex-end;
-            gap: 12px;
+            justify-content: space-between;
+            gap: 16px;
             flex-wrap: wrap;
-
-            margin-left: auto;
+            width: 100%;
         }
 
-        .nombre-cliente-pedidos {
+        .nombre-cliente-global {
             color: #ffffff;
             font-size: 14px;
             font-weight: 700;
+            white-space: nowrap;
         }
 
-        .btn-cerrar-sesion-pedidos {
+        .btn-cerrar-sesion-global {
             width: auto;
-
             padding: 9px 14px;
 
             background-color: rgba(255, 255, 255, 0.12);
@@ -59,12 +58,41 @@
             font-weight: 700;
 
             cursor: pointer;
-
             transition: 0.2s ease;
         }
 
-        .btn-cerrar-sesion-pedidos:hover {
+        .btn-cerrar-sesion-global:hover {
             background-color: rgba(255, 255, 255, 0.24);
+        }
+
+        /* =====================================================
+           MIS PEDIDOS
+           ===================================================== */
+
+        .acciones-mis-pedidos {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+
+            margin: 12px 0 8px;
+        }
+
+        .acciones-mis-pedidos button {
+            width: auto;
+        }
+
+        .barra-mis-pedidos {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+
+            margin: 8px 0 18px;
+            padding: 10px 14px;
+
+            background-color: #16733f;
+            border-radius: 7px;
         }
 
         /* =====================================================
@@ -111,14 +139,17 @@
 
         @media (max-width: 650px) {
 
+            .barra-sesion-cliente,
             .barra-mis-pedidos {
                 align-items: stretch;
             }
 
-            .barra-mis-pedidos-usuario {
-                width: 100%;
-                justify-content: space-between;
-                margin-left: 0;
+            .sesion-global-cliente {
+                align-items: stretch;
+            }
+
+            .nombre-cliente-global {
+                white-space: normal;
             }
         }
     </style>
@@ -145,7 +176,6 @@
             </span>
 
         </div>
-
 
         <button
             type="button"
@@ -609,6 +639,34 @@
                 Generar pedido
             </h2>
 
+
+            <!-- SESIÓN DEL CLIENTE -->
+
+            <div class="barra-sesion-cliente">
+
+                <div
+                    id="sesionGlobal"
+                    class="sesion-global-cliente"
+                    hidden>
+
+                    <span
+                        id="nombreClienteGlobal"
+                        class="nombre-cliente-global">
+                        👤 Cliente: Cliente
+                    </span>
+
+                    <button
+                        type="button"
+                        id="btnCerrarSesion"
+                        class="btn-cerrar-sesion-global">
+                        Cerrar sesión
+                    </button>
+
+                </div>
+
+            </div>
+
+
             <p>
                 El pedido se asociará automáticamente
                 a la cuenta con la que iniciaste sesión.
@@ -707,7 +765,9 @@
             </h2>
 
 
-            <div class="barra-mis-pedidos">
+            <!-- ACCIÓN INDEPENDIENTE -->
+
+            <div class="acciones-mis-pedidos">
 
                 <button
                     type="button"
@@ -715,28 +775,16 @@
                     Actualizar mis pedidos
                 </button>
 
-
-                <div
-                    id="sesionPedidos"
-                    class="barra-mis-pedidos-usuario"
-                    hidden>
-
-                    <span
-                        id="nombreClientePedidos"
-                        class="nombre-cliente-pedidos">
-                        👤 Cliente: Cliente
-                    </span>
+            </div>
 
 
-                    <button
-                        type="button"
-                        id="btnCerrarSesion"
-                        class="btn-cerrar-sesion-pedidos">
-                        Cerrar sesión
-                    </button>
+            <!--
+                El mismo bloque de sesión utilizado en
+                "Generar pedido" es trasladado aquí
+                automáticamente por app.js.
+            -->
 
-                </div>
-
+            <div class="barra-mis-pedidos">
             </div>
 
 

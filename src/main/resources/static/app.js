@@ -127,6 +127,57 @@ function ocultarSeccionesContenido() {
 }
 
 
+/* =========================================================
+   UBICACIÓN DE LA SESIÓN DEL CLIENTE
+   ========================================================= */
+
+function posicionarSesionCliente(seccion) {
+
+    const sesionGlobal =
+        document.getElementById(
+            "sesionGlobal"
+        );
+
+
+    if (!sesionGlobal) {
+
+        return;
+    }
+
+
+    if (seccion === "pedido") {
+
+        const barraPedido =
+            document.querySelector(
+                ".barra-sesion-cliente"
+            );
+
+
+        if (barraPedido) {
+
+            barraPedido.appendChild(
+                sesionGlobal
+            );
+        }
+
+    } else if (seccion === "pedidos") {
+
+        const barraPedidos =
+            document.querySelector(
+                ".barra-mis-pedidos"
+            );
+
+
+        if (barraPedidos) {
+
+            barraPedidos.appendChild(
+                sesionGlobal
+            );
+        }
+    }
+}
+
+
 function mostrarSeccion(seccion) {
 
     ocultarSeccionesContenido();
@@ -204,6 +255,14 @@ function mostrarSeccion(seccion) {
                     "seccionComprobante"
                 );
         }
+    }
+
+
+    if (seccion === "pedido" || seccion === "pedidos") {
+
+        posicionarSesionCliente(
+            seccion
+        );
     }
 
 
@@ -311,15 +370,15 @@ function actualizarInterfazSesion(
         );
 
 
-    const sesionPedidos =
+    const sesionGlobal =
         document.getElementById(
-            "sesionPedidos"
+            "sesionGlobal"
         );
 
 
-    const nombreClientePedidos =
+    const nombreClienteGlobal =
         document.getElementById(
-            "nombreClientePedidos"
+            "nombreClienteGlobal"
         );
 
 
@@ -327,7 +386,7 @@ function actualizarInterfazSesion(
         autenticado;
 
 
-    sesionPedidos.hidden =
+    sesionGlobal.hidden =
         !autenticado;
 
 
@@ -339,7 +398,7 @@ function actualizarInterfazSesion(
             || "Cliente";
 
 
-        nombreClientePedidos.textContent =
+        nombreClienteGlobal.textContent =
             `👤 Cliente: ${nombreCliente}`;
 
 
@@ -352,7 +411,7 @@ function actualizarInterfazSesion(
 
     } else {
 
-        nombreClientePedidos.textContent =
+        nombreClienteGlobal.textContent =
             "👤 Cliente: Cliente";
 
 
